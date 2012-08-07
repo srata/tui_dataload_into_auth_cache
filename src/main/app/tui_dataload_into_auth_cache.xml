@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="EE-3.3.0" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd 
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/2.0/mule-mongo.xsd 
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd ">
+    <mongo:config name="MongoDB-CloudConnector" database="TuiMarine" doc:name="MongoDB-CloudConnector"/>
+    <data-mapper:config name="BrokerAuthenticationData" transformationGraphPath="brokerauthenticationdata.grf" doc:name="BrokerAuthenticationData"/>
+    <flow name="tui_dataload_into_auth_cacheFlow1" doc:name="tui_dataload_into_auth_cacheFlow1">
+        <file:inbound-endpoint path="${app.home}/AuthDataUploadCSV1" moveToDirectory="${app.home}/AuthDataUploadCSV1/Processed" responseTimeout="10000" doc:name="File"/>
+        <data-mapper:transform config-ref="BrokerAuthenticationData" doc:name="DataMapper"/>
+        <foreach collection="#[payload]" doc:name="Foreach">
+            <mongo:insert-object-from-map config-ref="MongoDB-CloudConnector" collection="authentication" username="admin" password="admin" doc:name="Mongo DB">
+                <mongo:element-attributes ref="#[payload]"/>
+            </mongo:insert-object-from-map>
+            <logger message="Inserted Object: #[payload:]" level="INFO" doc:name="Logger"/>
+        </foreach>
+    </flow>
+
+</mule>

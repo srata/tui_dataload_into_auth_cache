@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mule-configuration xmlns="http://www.mulesoft.com/tooling/messageflow" name="tui_dataload_into_auth_cache">
+    <global-element type="http://www.mulesoft.org/schema/mule/mongo/config" name="MongoDB-CloudConnector" entity-id="c7ed6a2d-7413-4e67-8433-77eb58bebb64">
+        <properties>
+            <property value="MongoDB-CloudConnector" name="name"/>
+            <property name="username"/>
+            <property name="password"/>
+            <property name="host"/>
+            <property name="port"/>
+            <property value="TuiMarine" name="database"/>
+            <property name="connectTimeout"/>
+            <property name="connectionsPerHost"/>
+            <property name="maxWaitTime"/>
+            <property name="socketTimeout"/>
+            <property name="threadsAllowedToBlockForConnectionMultiplier"/>
+            <property name="w"/>
+            <property name="wtimeout"/>
+            <property name="autoConnectRetry"/>
+            <property name="fsync"/>
+            <property name="safe"/>
+            <property name="slaveOk"/>
+        </properties>
+    </global-element>
+    <global-element type="http://www.mulesoft.org/schema/mule/ee/data-mapper/config" name="BrokerAuthenticationData" entity-id="1f59071d-75df-430b-9245-6a9f0786d050">
+        <properties>
+            <property value="BrokerAuthenticationData" name="name"/>
+            <property value="brokerauthenticationdata.grf" name="transformationGraphPath"/>
+        </properties>
+    </global-element>
+    <flow SubFlow="false" name="tui_dataload_into_auth_cacheFlow1">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="34781a1d-c0b9-41b7-81fb-055fc37d557e">
+            <endpoint message-exchange-pattern="OneWay" direction="Inbound" type="http://www.mulesoft.org/schema/mule/file/endpoint" name="File" entity-id="df1e5955-a539-41b5-962f-eb452e3ab5e7">
+                <properties>
+                    <property value="one-way" name="exchange-pattern"/>
+                    <property value="${app.home}/AuthDataUploadCSV1" name="path"/>
+                    <property name="outputPattern"/>
+                    <property name="moveToPattern"/>
+                    <property value="${app.home}/AuthDataUploadCSV1/Processed" name="moveToDirectory"/>
+                    <property name="pollingFrequency"/>
+                    <property name="fileAge"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="address"/>
+                    <property value="10000" name="responseTimeout"/>
+                    <property name="encoding"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="comparator"/>
+                    <property name="reverseOrder"/>
+                    <property name="connector-ref"/>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                </properties>
+            </endpoint>
+            <pattern type="http://www.mulesoft.org/schema/mule/ee/data-mapper/data-mapper-connector" name="DataMapper" entity-id="0d599df5-cdf9-4ef4-966b-42fc24de900e">
+                <properties>
+                    <property value="BrokerAuthenticationData" name="config-ref"/>
+                    <property value="http://www.mulesoft.org/schema/mule/ee/data-mapper/transform" name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute"/>
+                    <property value="BrokerAuthenticationData" name="config-ref"/>
+                    <property name="input-ref"/>
+                </properties>
+            </pattern>
+            <scope type="http://www.mulesoft.org/schema/mule/core/foreach" name="Foreach" entity-id="6531d622-db70-4105-8624-4b8a6f89ca9e">
+                <properties>
+                    <property value="#[payload]" name="collection"/>
+                    <property name="counterVariableName"/>
+                    <property name="batchSize"/>
+                    <property name="rootMessageVariableName"/>
+                </properties>
+                <compartment entity-id="b2324626-cee8-40a5-afc1-621cc4c54a58">
+                    <lane hadOnlyOneElement="false" entity-id="3ec79538-4f24-478d-af7e-9a7a6f540d0d">
+                        <pattern type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" name="Mongo DB" entity-id="0002659b-bbbf-41d2-b4e6-bea14de135d5">
+                            <properties>
+<property value="MongoDB-CloudConnector" name="config-ref"/>
+<property value="http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map" name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute"/>
+<property value="MongoDB-CloudConnector" name="config-ref"/>
+<property value="authentication" name="collection"/>
+<property name="writeConcern"/>
+<property name=""/>
+<property value="admin" name="username"/>
+<property value="admin" name="password"/>
+<property-collection name="@http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map-element-attributess;0">
+    <property value="#[payload]" name="ref"/>
+</property-collection>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="c284103d-58d2-4edd-b541-fd58b161dd5f">
+                            <properties>
+<property value="Inserted Object: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </scope>
+        </lane>
+    </flow>
+    <description></description>
+</mule-configuration>

@@ -1,0 +1,17 @@
+
+flow1 implements the insertion of data into mongodb as List of Map
+
+Because the current version of Mule studio 1.3.0
+does not yet support comments in the XML code
+I am pasting here the code of another way to insert data into mongodb (as flow2)
+    <flow name="tui_dataload_into_auth_cacheFlow2" doc:name="tui_dataload_into_auth_cacheFlow2">
+        <file:inbound-endpoint path="${app.home}/AuthDataUploadCSV2" moveToDirectory="${app.home}/AuthDataUploadCSV2/Processed" responseTimeout="10000" doc:name="File"/>
+        <data-mapper:transform config-ref="BrokerAuthenticationData" doc:name="DataMapper"/>
+        <foreach collection="#[payload]" doc:name="Foreach">
+            <json:object-to-json-transformer doc:name="Object to JSON"/>
+            <logger message="Before mongodb: #[payload:]" level="INFO" doc:name="Logger JSON Payload"/>
+            <mongo:insert-object config-ref="MongoDB-CloudConnector" collection="authentication" username="admin" password="admin" doc:name="Mongo DB"/>
+            <logger message="Inserted Object: #[payload:]" level="INFO" doc:name="Logger"/>
+        </foreach>
+    </flow>
+    

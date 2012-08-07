@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Graph author="StephaneRata" created="Fri Aug 03 11:42:00 PDT 2012" guiVersion="3.3.0.M2" id="1344275302590" licenseCode="Unlicensed" licenseType="Unknown" modified="Fri Aug 03 11:42:00 PDT 2012" modifiedBy="StephaneRata" name="BrokerAuthenticationData" preview-file="${Project_Home}/AuthDataUploadCSV/Template/webwumst_sample_csv_no_header.csv" revision="1.0" showComponentDetails="false">
+<Global>
+<Metadata __sourcePath="{}/BrokerAuth" _dataStructure="SINGLE_DIMENSIONAL_COLLECTION" _id="__id" _type="Output" id="af2bd396-1855-4174-9391-bcafde3a7b7b">
+<Record fieldDelimiter="|" label="BrokerAuth" name="BrokerAuth" recordDelimiter="&#10;" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __sourcePath="{}/BrokerAuth/username" label="username" name="username" type="string"/>
+<Field __sourcePath="{}/BrokerAuth/password" label="password" name="password" type="string"/>
+<Field __sourcePath="{}/BrokerAuth/pseudocode" label="pseudocode" name="pseudocode" type="string"/>
+<Field __sourcePath="{}/BrokerAuth/accountname" label="accountname" name="accountname" type="string"/>
+<Field __sourcePath="{=}/BrokerAuth/apikey" name="apikey" type="string"/>
+<Field __sourcePath="{=}/BrokerAuth/userip" containerType="" label="userip" name="userip" type="string"/>
+<Field __sourcePath="{=}/BrokerAuth/channel" containerType="" name="channel" type="string"/>
+<Field __sourcePath="{=}/BrokerAuth/requestcount" containerType="" name="requestcount" type="integer"/>
+<Field __sourcePath="{=}/BrokerAuth/sessionstart" containerType="" name="sessionstart" type="date"/>
+<Field __sourcePath="{=}/BrokerAuth/sessionend" containerType="" name="sessionend" type="date"/>
+</Record>
+</Metadata>
+<Metadata _type="Input" id="Metadata0">
+<Record fieldDelimiter="," name="webwumst_sample_csv" recordDelimiter="\r" type="delimited">
+<Field name="WUUSER" type="string"/>
+<Field name="WUPSCD" type="string"/>
+<Field name="WUPASS" type="string"/>
+<Field eofAsDelimiter="true" name="WUNAME" type="string"/>
+</Record>
+</Metadata>
+<Dictionary>
+<Entry id="DictionaryEntry0" input="true" name="inputPayload" output="false" type="object"/>
+<Entry id="DictionaryEntry1" input="false" name="outputPayload" output="true" type="object"/>
+</Dictionary>
+</Global>
+<Phase number="0">
+<Node enabled="enabled" fileURL="dict:inputPayload" guiHeight="0" guiName="CSV Reader" guiWidth="0" guiX="20" guiY="20" id="DATA_READER0" skipRows="1" type="DATA_READER">
+<attr name="_data_format"><![CDATA[CSV]]></attr>
+</Node>
+<Node enabled="enabled" fileURL="dict:outputPayload" guiHeight="0" guiName="MAP Writer" guiWidth="0" guiX="460" guiY="20" id="MAP_WRITER0" type="MAP_WRITER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<clover:collection clover:name="BrokerAuth" xmlns:clover="http://www.cloveretl.com/ns/xmlmapping">
+  <item clover:inPort="0">
+    <username>$0.username</username>
+    <password>$0.password</password>
+    <pseudocode>$0.pseudocode</pseudocode>
+    <accountname>$0.accountname</accountname>
+    <apikey>$0.apikey</apikey>
+    <userip>$0.userip</userip>
+    <channel>$0.channel</channel>
+    <requestcount>$0.requestcount</requestcount>
+    <sessionstart>$0.sessionstart</sessionstart>
+    <sessionend>$0.sessionend</sessionend>
+  </item>
+</clover:collection>]]></attr>
+<attr name="_data_format"><![CDATA[MAP]]></attr>
+</Node>
+<Node enabled="enabled" guiHeight="0" guiName="webwumst_sample_csv_to_BrokerAuth" guiWidth="0" guiX="240" guiY="20" id="REFORMAT0" type="REFORMAT">
+<attr name="transform"><![CDATA[//#CTL2
+
+// Transforms input record into output record.
+function integer transform() {
+	$out.0.sessionend = zeroDate();
+	$out.0.sessionstart = zeroDate();
+					$out.0.channel = "";
+	$out.0.userip = "";
+	$out.0.requestcount = 0;
+	$out.0.apikey = byte2base64(md5($in.0.WUUSER + $in.0.WUPASS));
+			$out.0.accountname = $in.0.WUNAME;
+	$out.0.password = $in.0.WUPASS;
+	$out.0.pseudocode = $in.0.WUPSCD;
+	$out.0.username = $in.0.WUUSER;
+	return ALL;
+}
+
+// Called during component initialization.
+// function boolean init() {}
+
+// Called during each graph run before the transform is executed. May be used to allocate and initialize resources
+// required by the transform. All resources allocated within this method should be released
+// by the postExecute() method.
+// function void preExecute() {}
+
+// Called only if transform() throws an exception.
+// function integer transformOnError(string errorMessage, string stackTrace) {}
+
+// Called during each graph run after the entire transform was executed. Should be used to free any resources
+// allocated within the preExecute() method.
+// function void postExecute() {}
+
+// Called to return a user-defined error message when an error occurs.
+// function string getMessage() {}
+]]></attr>
+</Node>
+<Edge debugMode="true" fromNode="DATA_READER0:0" guiBendpoints="" id="Edge0" inPort="Port 0 (in)" metadata="Metadata0" outPort="Port 0 (output)" toNode="REFORMAT0:0"/>
+<Edge debugMode="true" fromNode="REFORMAT0:0" guiBendpoints="" id="Edge1" inPort="Port 0 (in)" metadata="af2bd396-1855-4174-9391-bcafde3a7b7b" outPort="Port 0 (out)" toNode="MAP_WRITER0:0"/>
+</Phase>
+</Graph>
